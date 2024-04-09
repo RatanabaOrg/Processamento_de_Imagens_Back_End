@@ -16,6 +16,7 @@ class Fazenda {
       const db = admin.firestore();
 
       let enderecoId;
+      let fazendaId;
 
       db.collection('Endereco').add(endereco)
         .then(addressDoc => {
@@ -29,8 +30,10 @@ class Fazenda {
           });
         })
         .then(fazendaDoc => {
+          fazendaId = fazendaDoc.id;
+
           return db.collection('DadosUsuario').doc(usuarioId).update({
-            fazendaId: fazendaDoc.id
+            fazendaId: admin.firestore.FieldValue.arrayUnion(fazendaId)
           });
         })
         .then(() => {

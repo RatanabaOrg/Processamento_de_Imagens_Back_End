@@ -22,7 +22,7 @@ class Armadilha {
 
                     // Atualize o documento do talhão para incluir o ID da armadilha
                     return db.collection('Talhao').doc(talhaoId).update({
-                        armadilhaId: armadilhaId
+                        armadilhaId: admin.firestore.FieldValue.arrayUnion(armadilhaId)
                     });
                 })
                 .then(() => {
