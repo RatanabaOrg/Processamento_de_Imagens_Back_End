@@ -1,7 +1,7 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('../firebaseAdminConfig.json');
 
-if (admin.apps.length === 0) { 
+if (admin.apps.length === 0) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
@@ -10,45 +10,52 @@ if (admin.apps.length === 0) {
 class Usuario {
   cadastro(data) {
     return new Promise((resolve, reject) => {
-      const { nome, email, senha, confirmarSenha, telefone, cep, logradouro, numero, cidade, uf, complemento, bairro } = data;
+        const { nome, email, senha, confirmarSenha, telefone, endereco } = data;
 
-      if (senha !== confirmarSenha) {
-        reject('As senhas não coincidem.');
-        return;
-      }
+        if (senha !== confirmarSenha) {
+            reject('As senhas não coincidem.');
+            return;
+        }
 
-      admin.auth().createUser({
-        email,
-        password: senha,
-      })
+        admin.auth().createUser({
+            email,
+            password: senha,
+        })
         .then(userRecord => {
-          const userId = userRecord.uid;
-          const db = admin.firestore();
-          db.collection('DadosUsuario').doc(userId).set({
-            cep,
-            logradouro,
-            bairro,
-            cidade,
-            complemento,
-            uf,
-            telefone,
-            nome,
-            numero,
-          })
+            const userId = userRecord.uid;
+            const db = admin.firestore();
+
+            // Primeiro, crie um documento para o endereço
+            db.collection('Endereco').add(endereco)
+            .then(addressDoc => {
+                const enderecoId = addressDoc.id;
+
+                // Em seguida, adicione o ID do endereço ao documento do usuário
+                return db.collection('DadosUsuario').doc(userId).set({
+                    nome,
+                    telefone,
+                    enderecoId,
+                });
+            })
             .then(() => {
-              resolve('Usuário cadastrado com sucesso.');
+                resolve('Usuário cadastrado com sucesso.');
             })
             .catch(error => {
-              console.error('Erro ao salvar dados adicionais:', error);
-              reject('Erro ao salvar informações adicionais do usuário.');
+                console.error('Erro ao salvar dados adicionais:', error);
+                reject('Erro ao salvar informações adicionais do usuário.');
             });
         })
         .catch(error => {
-          console.error('Erro ao criar usuário:', error);
-          reject('Erro ao cadastrar usuário.');
+            console.error('Erro ao criar usuário:', error);
+            reject('Erro ao cadastrar usuário.');
         });
     });
-  }
+}
+
+
+
+
+
 
   async buscarPorUid(uid) {
     return new Promise((resolve, reject) => {
@@ -140,7 +147,7 @@ class Usuario {
         });
     });
   }
-  
+
 
 }
 
