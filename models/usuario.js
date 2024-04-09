@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('../firebaseAdminConfig.json');
+const { Fazenda } = require('./fazenda');
 
 if (admin.apps.length === 0) {
   admin.initializeApp({
@@ -10,52 +11,47 @@ if (admin.apps.length === 0) {
 class Usuario {
   cadastro(data) {
     return new Promise((resolve, reject) => {
-        const { nome, email, senha, confirmarSenha, telefone, endereco } = data;
+      const { nome, email, senha, confirmarSenha, telefone, endereco } = data;
 
-        if (senha !== confirmarSenha) {
-            reject('As senhas não coincidem.');
-            return;
-        }
+      if (senha !== confirmarSenha) {
+        reject('As senhas não coincidem.');
+        return;
+      }
 
-        admin.auth().createUser({
-            email,
-            password: senha,
-        })
+      admin.auth().createUser({
+        email,
+        password: senha,
+      })
         .then(userRecord => {
-            const userId = userRecord.uid;
-            const db = admin.firestore();
+          const userId = userRecord.uid;
+          const db = admin.firestore();
 
-            // Primeiro, crie um documento para o endereço
-            db.collection('Endereco').add(endereco)
+          // Primeiro, crie um documento para o endereço
+          db.collection('Endereco').add(endereco)
             .then(addressDoc => {
-                const enderecoId = addressDoc.id;
+              const enderecoId = addressDoc.id;
 
-                // Em seguida, adicione o ID do endereço ao documento do usuário
-                return db.collection('DadosUsuario').doc(userId).set({
-                    nome,
-                    telefone,
-                    enderecoId,
-                });
+              // Em seguida, adicione o ID do endereço ao documento do usuário
+              return db.collection('DadosUsuario').doc(userId).set({
+                nome,
+                telefone,
+                enderecoId,
+              });
             })
             .then(() => {
-                resolve('Usuário cadastrado com sucesso.');
+              resolve('Usuário cadastrado com sucesso.');
             })
             .catch(error => {
-                console.error('Erro ao salvar dados adicionais:', error);
-                reject('Erro ao salvar informações adicionais do usuário.');
+              console.error('Erro ao salvar dados adicionais:', error);
+              reject('Erro ao salvar informações adicionais do usuário.');
             });
         })
         .catch(error => {
-            console.error('Erro ao criar usuário:', error);
-            reject('Erro ao cadastrar usuário.');
+          console.error('Erro ao criar usuário:', error);
+          reject('Erro ao cadastrar usuário.');
         });
     });
-}
-
-
-
-
-
+  }
 
   async buscarPorUid(uid) {
     return new Promise((resolve, reject) => {
@@ -144,6 +140,50 @@ class Usuario {
         .catch(error => {
           console.error('Erro ao buscar todos os usuários:', error);
           reject('Erro ao buscar usuários.');
+        });
+    });
+  }
+
+  buscarPorUidCompleto(uid) {
+    return new Promise((resolve, reject) => {
+      admin.auth().getUser(uid)
+        .then(userRecord => {
+          // Supondo que os dados adicionais dos usuários estão armazenados no Firestore
+          const db = admin.firestore();
+          db.collection('DadosUsuario').doc(uid).get()
+            .then(doc => {
+              if (!doc.exists) {
+                reject('Nenhum dado encontrado.');
+              } else {
+                const dados = doc.data();
+                const fazendasIds = dados.fazendaId;
+                const promisesFazendas = []; // Array para armazenar as promessas de busca das fazendas
+                if (fazendasIds.length > 0) {
+                  for (let f = 0; f < fazendasIds.length; f++) {
+                    const fazenda = new Fazenda();
+                    promisesFazendas.push(fazenda.buscarPorUidCompleto(fazendasIds[f])); // Adiciona a promessa ao array
+                  }
+                }
+                // Aguarda a resolução de todas as promessas
+                Promise.all(promisesFazendas)
+                  .then(fazendas => {
+                    dados.fazendas = fazendas; // Adiciona a lista de fazendas aos dados
+                    resolve(dados);
+                  })
+                  .catch(error => {
+                    console.error('Erro ao buscar detalhes das fazendas:', error);
+                    reject('Erro ao buscar detalhes das fazendas.');
+                  });
+              }
+            })
+            .catch(error => {
+              console.error('Erro ao buscar dados adicionais:', error);
+              reject('Erro ao buscar informações adicionais do usuário.');
+            });
+        })
+        .catch(error => {
+          console.error('Erro ao buscar usuário:', error);
+          reject('Usuário não encontrado.');
         });
     });
   }

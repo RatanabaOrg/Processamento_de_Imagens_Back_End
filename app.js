@@ -34,6 +34,18 @@ app.get('/usuario/:uid', async (req, res) => {
     }
 });
 
+app.get('/usuario/completo/:uid', async (req, res) => {
+    const { uid } = req.params;
+    var usuario = new Usuario();
+    try {
+        const userRecord = await usuario.buscarPorUidCompleto(uid)
+        res.send(userRecord);
+    } catch (error) {
+        console.error('Erro ao buscar usuário:', error);
+        res.status(500).send("Erro durante o processo de busca.");
+    }
+});
+
 app.put('/usuario/:uid', async (req, res) => {
     const { uid } = req.params;
     var usuario = new Usuario();
@@ -95,6 +107,18 @@ app.get('/fazenda/:uid', async (req, res) => {
     }
 });
 
+app.get('/fazenda/completo/:uid', async (req, res) => {
+    const { uid } = req.params;
+    var fazenda = new Fazenda();
+    try {
+        const userRecord = await fazenda.buscarPorUidCompleto(uid)
+        res.send(userRecord);
+    } catch (error) {
+        console.error('Erro ao buscar usuário:', error);
+        res.status(500).send("Erro durante o processo de busca.");
+    }
+});
+
 app.put('/fazenda/:uid', async (req, res) => {
     const { uid } = req.params;
     var fazenda = new Fazenda();
@@ -149,6 +173,18 @@ app.get('/talhao/:uid', async (req, res) => {
     var talhao = new Talhao();
     try {
         const userRecord = await talhao.buscarPorUid(uid)
+        res.send(userRecord);
+    } catch (error) {
+        console.error('Erro ao buscar usuário:', error);
+        res.status(500).send("Erro durante o processo de busca.");
+    }
+});
+
+app.get('/talhao/completo/:uid', async (req, res) => {
+    const { uid } = req.params;
+    var talhao = new Talhao();
+    try {
+        const userRecord = await talhao.buscarPorUidCompleto(uid)
         res.send(userRecord);
     } catch (error) {
         console.error('Erro ao buscar usuário:', error);

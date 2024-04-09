@@ -109,25 +109,37 @@ class Talhao {
         });
     }
 
-    // Função para obter todos os talhões de uma fazenda
-    obterTodosTalhoesDaFazenda(fazendaId) {
+    buscarPorUidCompleto(talhaoId) {
         return new Promise((resolve, reject) => {
-            const db = admin.firestore();
-
-            db.collection('Talhao').where('fazendaId', '==', fazendaId).get()
-                .then(snapshot => {
-                    const talhoes = [];
-                    snapshot.forEach(doc => {
-                        talhoes.push({ id: doc.id, ...doc.data() });
-                    });
-                    resolve(talhoes);
-                })
-                .catch(error => {
-                    console.error('Erro ao obter todos os talhões da fazenda:', error);
-                    reject('Erro ao obter todos os talhões da fazenda.');
-                });
+          const db = admin.firestore();
+    
+          let talhao = {};
+    
+          db.collection('Talhao').doc(talhaoId).get()
+            .then(talhaoDoc => {
+              if (!talhaoDoc.exists) {
+                reject('Fazenda não encontrada.');
+                return;
+              }
+    
+              talhao = { id: talhaoDoc.id, ...talhaoDoc.data() };
+    
+              return db.collection('Armadilha').where('talhaoId', '==', talhaoId).get();
+            })
+            .then(snapshot => {
+              const armadilha = [];
+              snapshot.forEach(doc => {
+                armadilha.push({ id: doc.id, ...doc.data() });
+              });
+              talhao.armadilha = armadilha; 
+              resolve(talhao);
+            })
+            .catch(error => {
+              console.error('Erro ao obter detalhes completos da fazenda:', error);
+              reject('Erro ao obter detalhes completos da fazenda.');
+            });
         });
-    }
+      }
 }
 
 module.exports = {
