@@ -5,9 +5,11 @@ const usuario = require('./models/usuario');
 const { Fazenda } = require('./models/fazenda');
 const { Talhao } = require('./models/talhao');
 const { Armadilha } = require('./models/armadilha');
+const cors = require('cors');
 
 
 const app = express();
+app.use(cors()); 
 app.use(bodyParser.json());
 
 
