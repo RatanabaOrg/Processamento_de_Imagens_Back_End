@@ -129,7 +129,7 @@ class Fazenda {
             reject('Nenhum dado encontrado.');
           } else {
             const dados = doc.data();
-            const talhoesIds = dados.talhoes;
+            const talhoesIds = dados.talhaoId;
             const promisesTalhoes = []; // Array para armazenar as promessas de busca das fazendas
             if (talhoesIds.length > 0) {
               for (let f = 0; f < talhoesIds.length; f++) {

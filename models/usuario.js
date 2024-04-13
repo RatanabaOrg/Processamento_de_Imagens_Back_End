@@ -36,6 +36,7 @@ class Usuario {
                 nome,
                 telefone,
                 enderecoId,
+                cliente: true
               });
             })
             .then(() => {

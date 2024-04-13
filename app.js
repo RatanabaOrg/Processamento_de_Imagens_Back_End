@@ -6,6 +6,7 @@ const { Fazenda } = require('./models/fazenda');
 const { Talhao } = require('./models/talhao');
 const { Armadilha } = require('./models/armadilha');
 const cors = require('cors');
+const {Verificacao} = require('./models/verificacao');
 
 
 const app = express();
@@ -26,13 +27,35 @@ app.post('/usuario/cadastro', async (req, res) => {
 
 app.get('/usuario/:uid', async (req, res) => {
     const { uid } = req.params;
-    var usuario = new Usuario();
-    try {
-        const userRecord = await usuario.buscarPorUid(uid)
-        res.send(userRecord);
-    } catch (error) {
-        console.error('Erro ao buscar usuário:', error);
-        res.status(500).send("Erro durante o processo de busca.");
+
+    const authHeader = req.headers.authorization
+
+    var verificacao = new Verificacao()
+    const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
+
+    if (tokenUid != false) {
+        if (tokenUid == uid) {
+            var usuario = new Usuario();
+            try {
+                const userRecord = await usuario.buscarPorUid(uid)
+                res.send(userRecord);
+            } catch (error) {
+                res.status(500).send("Erro durante o processo de busca.");
+            }
+        } else if (tokenUid == "adm"){
+            var usuario = new Usuario();
+            try {
+                const userRecord = await usuario.buscarPorUid(uid)
+                res.send(userRecord);
+            } catch (error) {
+                res.status(500).send("Erro durante o processo de busca.");
+            }
+        } else {
+            res.status(500).send("Sem permissão");
+        }
+
+    } else {
+        res.status(500).send("Nenhum token fornecido.");
     }
 });
 

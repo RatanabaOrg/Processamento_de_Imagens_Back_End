@@ -26,7 +26,7 @@ class Talhao {
                     talhaoId = talhaoDoc.id;
 
                     return db.collection('Fazenda').doc(fazendaId).update({
-                        talhoes: admin.firestore.FieldValue.arrayUnion(talhaoId)
+                        talhaoId: admin.firestore.FieldValue.arrayUnion(talhaoId)
                     });
                 })
                 .then(() => {
