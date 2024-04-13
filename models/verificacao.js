@@ -23,7 +23,6 @@ class Verificacao {
             }
         } catch (error) {
             console.error('Erro ao verificar token:', error);
-            throw new Error('Erro ao processar o token de autenticação.');
         }
     }
     

@@ -6,11 +6,11 @@ const { Fazenda } = require('./models/fazenda');
 const { Talhao } = require('./models/talhao');
 const { Armadilha } = require('./models/armadilha');
 const cors = require('cors');
-const {Verificacao} = require('./models/verificacao');
+const { Verificacao } = require('./models/verificacao');
 
 
 const app = express();
-app.use(cors()); 
+app.use(cors());
 app.use(bodyParser.json());
 
 
@@ -29,7 +29,6 @@ app.get('/usuario/:uid', async (req, res) => {
     const { uid } = req.params;
 
     const authHeader = req.headers.authorization
-
     var verificacao = new Verificacao()
     const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
 
@@ -42,7 +41,7 @@ app.get('/usuario/:uid', async (req, res) => {
             } catch (error) {
                 res.status(500).send("Erro durante o processo de busca.");
             }
-        } else if (tokenUid == "adm"){
+        } else if (tokenUid == "adm") {
             var usuario = new Usuario();
             try {
                 const userRecord = await usuario.buscarPorUid(uid)
@@ -61,49 +60,133 @@ app.get('/usuario/:uid', async (req, res) => {
 
 app.get('/usuario/completo/:uid', async (req, res) => {
     const { uid } = req.params;
-    var usuario = new Usuario();
-    try {
-        const userRecord = await usuario.buscarPorUidCompleto(uid)
-        res.send(userRecord);
-    } catch (error) {
-        console.error('Erro ao buscar usuário:', error);
-        res.status(500).send("Erro durante o processo de busca.");
+
+    const authHeader = req.headers.authorization
+    var verificacao = new Verificacao()
+    const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
+
+    if (tokenUid != false) {
+        if (tokenUid == uid) {
+            var usuario = new Usuario();
+            try {
+                const userRecord = await usuario.buscarPorUidCompleto(uid)
+                res.send(userRecord);
+            } catch (error) {
+                console.error('Erro ao buscar usuário:', error);
+                res.status(500).send("Erro durante o processo de busca.");
+            }
+        } else if (tokenUid == "adm") {
+            var usuario = new Usuario();
+            try {
+                const userRecord = await usuario.buscarPorUidCompleto(uid)
+                res.send(userRecord);
+            } catch (error) {
+                console.error('Erro ao buscar usuário:', error);
+                res.status(500).send("Erro durante o processo de busca.");
+            }
+        } else {
+            res.status(500).send("Sem permissão");
+        }
+
+    } else {
+        res.status(500).send("Nenhum token fornecido.");
     }
 });
 
 app.put('/usuario/:uid', async (req, res) => {
     const { uid } = req.params;
-    var usuario = new Usuario();
-    try {
-        const userRecord = await usuario.atualizar(uid, req.body)
-        res.send(userRecord);
-    } catch (error) {
-        console.error('Erro ao atualizar usuário:', error);
-        res.status(500).send("Erro durante o processo de atualização.");
+
+    const authHeader = req.headers.authorization
+    var verificacao = new Verificacao()
+    const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
+
+    if (tokenUid != false) {
+        if (tokenUid == uid) {
+            var usuario = new Usuario();
+            try {
+                const userRecord = await usuario.atualizar(uid, req.body)
+                res.send(userRecord);
+            } catch (error) {
+                console.error('Erro ao atualizar usuário:', error);
+                res.status(500).send("Erro durante o processo de atualização.");
+            }
+        } else if (tokenUid == "adm") {
+            var usuario = new Usuario();
+            try {
+                const userRecord = await usuario.atualizar(uid, req.body)
+                res.send(userRecord);
+            } catch (error) {
+                console.error('Erro ao atualizar usuário:', error);
+                res.status(500).send("Erro durante o processo de atualização.");
+            }
+        } else {
+            res.status(500).send("Sem permissão");
+        }
+
+    } else {
+        res.status(500).send("Nenhum token fornecido.");
     }
 });
 
 app.delete('/usuario/:uid', async (req, res) => {
     const { uid } = req.params;
-    var usuario = new Usuario();
-    try {
-        await usuario.excluir(uid)
-        // Exclua também as informações no Firestore, se necessário
-        res.send(`Usuário ${uid} excluído com sucesso.`);
-    } catch (error) {
-        console.error('Erro ao excluir usuário:', error);
-        res.status(500).send("Erro durante o processo de exclusão.");
+
+    const authHeader = req.headers.authorization
+    var verificacao = new Verificacao()
+    const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
+
+    if (tokenUid != false) {
+        if (tokenUid == uid) {
+            var usuario = new Usuario();
+            try {
+                await usuario.excluir(uid)
+                // Exclua também as informações no Firestore, se necessário
+                res.send(`Usuário ${uid} excluído com sucesso.`);
+            } catch (error) {
+                console.error('Erro ao excluir usuário:', error);
+                res.status(500).send("Erro durante o processo de exclusão.");
+            }
+        } else if (tokenUid == "adm") {
+            var usuario = new Usuario();
+            try {
+                await usuario.excluir(uid)
+                // Exclua também as informações no Firestore, se necessário
+                res.send(`Usuário ${uid} excluído com sucesso.`);
+            } catch (error) {
+                console.error('Erro ao excluir usuário:', error);
+                res.status(500).send("Erro durante o processo de exclusão.");
+            }
+        } else {
+            res.status(500).send("Sem permissão");
+        }
+
+    } else {
+        res.status(500).send("Nenhum token fornecido.");
     }
 });
 
 app.get('/usuario', async (req, res) => {
-    var usuario = new Usuario();
-    try {
-        const usuarios = await usuario.buscarTodos();
-        res.send(usuarios);
-    } catch (error) {
-        console.error('Erro ao buscar todos os usuários:', error);
-        res.status(500).send("Erro durante o processo de busca de todos os usuários.");
+
+    const authHeader = req.headers.authorization
+    var verificacao = new Verificacao()
+    const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
+
+    if (tokenUid != false) {
+        if (tokenUid == "adm") {
+            var usuario = new Usuario();
+            try {
+                const usuarios = await usuario.buscarTodos();
+                res.send(usuarios);
+            } catch (error) {
+                console.error('Erro ao buscar todos os usuários:', error);
+                res.status(500).send("Erro durante o processo de busca de todos os usuários.");
+            }
+        } else {
+            res.status(500).send("Sem permissão");
+        }
+
+    } else {
+        res.status(500).send("Nenhum token fornecido.");
     }
 });
 
