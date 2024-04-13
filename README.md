@@ -1,24 +1,10 @@
 <div align="center" id="menu">
 
-![logo](https://github.com/RatanabaOrg/documentacao/assets/100284976/3b3af8d0-a426-4abc-a3a4-d9f7981e3a5a)
+![logo](https://github.com/RatanabaOrg/back_end/assets/100284976/e96da343-9303-4902-986b-a4546261f532)
 
 <h3> Aplicação mobile para registro e quantificação de pragas em campos agrícolas </h3>
 
 </div> 
-
-<br>
-
-## :pencil: Sobre o projeto
-
- O projeto propõe uma solução para um dos desafios fundamentais na agricultura brasileira: a contagem precisa de pragas nos campos. Atualmente, esse processo é feito manualmente, o que consome tempo e recursos. Com o intuito de simplificar essa tarefa, planejamos desenvolver um aplicativo que permitirá localizar armadilhas, capturar fotos e em seguida, processá-las para determinar a quantidade de pragas presentes. Essa iniciativa proporcionará aos agricultores informações mais rápidas e precisas sobre a aplicação de defensivos agrícolas, além de possibilitar um monitoramento mais eficiente das armadilhas utilizadas.
-
-<br>
-
-<h2> 🗂 Repositórios </h2>
-
-- Repositório Documentação: [https://github.com/RatanabaOrg/documentacao.git](https://github.com/RatanabaOrg/documentacao.git)
-
-- Repositório Frontend: [https://github.com/RatanabaOrg/front_end.git](https://github.com/RatanabaOrg/front_end.git)
 
 <br>
 
@@ -65,17 +51,10 @@ O servidor estará rodando e acessível em `http://localhost:PORTA`, onde `PORTA
 
 <br>
 
-## :busts_in_silhouette: Equipe
+<h2> 🗂 Repositórios </h2>
 
-<div align="center">
-  
-|           Nome            |    Função     |        Redes profissionais        |
-| :-----------------------: | :-----------: | :-------------------------------: |
-| Amanda Vieira de Oliveira | Product Owner |  [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/amanda-vo/) <br> [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/amandavo) |
-|   Lucas França Registro   |  Scrum Master | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com) <br> [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/LucasFrancaRegistro) |
-|  Carlos Eduardo Falandes  |    Dev Team   | [![Lattes Badge](https://img.shields.io/badge/-Lattes-orange?style=flat-square&logo=GitBook&logoColor=white&link=http://lattes.cnpq.br/2433599000300626)](http://lattes.cnpq.br/3579183651868833) <br> [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/Desduh) |
-|    Júlia Sousa Gayotto    |    Dev Team   | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/júlia-gayotto/) <br> [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/JuliaGayotto) |
+- Repositório Documentação: [https://github.com/RatanabaOrg/documentacao.git](https://github.com/RatanabaOrg/documentacao.git)
 
-</div>
+- Repositório Frontend: [https://github.com/RatanabaOrg/front_end.git](https://github.com/RatanabaOrg/front_end.git)
 
-<a href="#menu">Voltar ao topo</a>
+<br>
