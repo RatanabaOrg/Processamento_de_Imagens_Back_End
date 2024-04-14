@@ -46,8 +46,37 @@ O servidor estará rodando e acessível em `http://localhost:PORTA`, onde `PORTA
 
 ### Portas utilizadas
 
-- **/login**: recebe um json com: e retorna se o usario existe ou não
-- **/cadastro**: recebe um json com: e retorna se o usuario foi ou não cadastrado
+Usuários
+- **/login**: POST - Recebe um json com: e retorna se o usario existe ou não
+- **/usuario/cadastro**: POST - Recebe um json com: e retorna se o usuario foi ou não cadastrado
+- **/usuario**: GET - Retorna todos os usuários
+- **/usuario/:id**: DEL - Deleta o usuário respectivo ao id passado na rota
+- **/usuario/:id**: GET - Retorna os dados do usuário respectivo ao id passado na rota
+- **/usuario/:id**: PUT - Recebe um json com os dados para atualizar e atualiza o usuário respectivo ao id passado na rota
+- **/usuario/completo/:id**: GET - Retorna os dados do usuário e todas dependências do mesmo: fazendas, talhões, armadilhas e endereço
+
+Fazendas
+- **/fazenda/cadastro**: POST - Recebe um json com: e retorna se o fazenda foi ou não cadastrada
+- **/usuario**: GET - Retorna todos as fazendas
+- **/fazenda/:id**: DEL - Deleta a fazenda respectiva ao id passado na rota
+- **/fazenda/:id**: GET - Retorna os dados da fazenda respectiva ao id passado na rota
+- **/fazenda/:id**: PUT - Recebe um json com os dados para atualizar e atualiza a fazenda respectiva ao id passado na rota
+- **/fazenda/completo/:id**: GET - Retorna os dados da fazenda e todas dependências do mesmo: talhões e armadilhas
+
+Talhões
+- **/talhao/cadastro**: POST - Recebe um json com: e retorna se o usuario foi ou não cadastrado
+- **/talhao**: GET - Retorna todos os talhões
+- **/talhao/:id**: DEL - Deleta o talhão respectivo ao id passado na rota
+- **/talhao/:id**: GET - Retorna os dados do talhão respectivo ao id passado na rota
+- **/talhao/:id**: PUT - Recebe um json com os dados para atualizar e atualiza o talhão respectivo ao id passado na rota
+- **/talhao/completo/:id**: GET - Retorna os dados do talhão e todas armadilhas do mesmo
+
+Armadilhas
+- **/armadilha/cadastro**: POST - Recebe um json com: e retorna se a armadilha foi ou não cadastrada
+- **/armadilha**: GET - Retorna todos as armadilhas
+- **/armadilha/:id**: DEL - Deleta a armadilha respectiva ao id passado na rota
+- **/armadilha/:id**: GET - Retorna os dados da armadilha respectiva ao id passado na rota
+- **/armadilha/:id**: PUT - Recebe um json com os dados para atualizar e atualiza a armadilha respectiva ao id passado na rota
 
 <br>
 
