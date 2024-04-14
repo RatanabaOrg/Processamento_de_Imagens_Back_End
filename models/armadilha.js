@@ -75,17 +75,33 @@ class Armadilha {
     excluir(armadilhaId) {
         return new Promise((resolve, reject) => {
             const db = admin.firestore();
-
+    
+            // Primeiro, exclua a armadilha.
             db.collection('Armadilha').doc(armadilhaId).delete()
                 .then(() => {
-                    resolve('Armadilha excluída com sucesso.');
+                    // Busca todos os talhões que contêm o ID da armadilha em seu array.
+                    return db.collection('Talhao').where('armadilhaId', 'array-contains', armadilhaId).get();
+                })
+                .then(querySnapshot => {
+                    // Cria uma lista de promessas para atualizar cada talhão.
+                    const updatePromises = [];
+                    querySnapshot.forEach(doc => {
+                        // Remove o ID da armadilha do array 'armadilhaId'.
+                        const updatedArmadilhaIds = doc.data().armadilhaId.filter(id => id !== armadilhaId);
+                        updatePromises.push(doc.ref.update({ armadilhaId: updatedArmadilhaIds }));
+                    });
+                    // Espera todas as atualizações serem concluídas.
+                    return Promise.all(updatePromises);
+                })
+                .then(() => {
+                    resolve('Armadilha excluída com sucesso e referências atualizadas.');
                 })
                 .catch(error => {
-                    console.error('Erro ao excluir armadilha:', error);
-                    reject('Erro ao excluir armadilha.');
+                    console.error('Erro ao excluir armadilha ou atualizar talhões:', error);
+                    reject('Erro ao excluir armadilha ou atualizar talhões.');
                 });
         });
-    }
+    }    
 
     // Função para obter todas as armadilhas
     buscarTodos() {

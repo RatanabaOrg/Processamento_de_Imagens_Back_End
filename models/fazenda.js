@@ -86,13 +86,29 @@ class Fazenda {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
 
+      // Primeiro, exclua a armadilha.
       db.collection('Fazenda').doc(fazendaId).delete()
         .then(() => {
-          resolve('Fazenda excluída com sucesso.');
+          // Busca todos os talhões que contêm o ID da armadilha em seu array.
+          return db.collection('DadosUsuario').where('fazendaId', 'array-contains', fazendaId).get();
+        })
+        .then(querySnapshot => {
+          // Cria uma lista de promessas para atualizar cada talhão.
+          const updatePromises = [];
+          querySnapshot.forEach(doc => {
+            // Remove o ID da armadilha do array 'armadilhaId'.
+            const updatedFazendaIds = doc.data().fazendaId.filter(id => id !== fazendaId);
+            updatePromises.push(doc.ref.update({ fazendaId: updatedFazendaIds }));
+          });
+          // Espera todas as atualizações serem concluídas.
+          return Promise.all(updatePromises);
+        })
+        .then(() => {
+          resolve('Armadilha excluída com sucesso e referências atualizadas.');
         })
         .catch(error => {
-          console.error('Erro ao excluir fazenda:', error);
-          reject('Erro ao excluir fazenda.');
+          console.error('Erro ao excluir armadilha ou atualizar talhões:', error);
+          reject('Erro ao excluir armadilha ou atualizar talhões.');
         });
     });
   }
@@ -132,22 +148,22 @@ class Fazenda {
             if (talhoesIds != undefined) {
               for (let f = 0; f < talhoesIds.length; f++) {
                 const talhao = new Talhao();
-                promisesTalhoes.push(talhao.buscarPorUidCompleto(talhoesIds[f])); 
+                promisesTalhoes.push(talhao.buscarPorUidCompleto(talhoesIds[f]));
               }
             }
 
             db.collection('DadosUsuario').doc(dados.usuarioId).get()
-            .then(usuarioDoc => {
-              if (!usuarioDoc.exists) {
-                reject('usuario não encontrada.');
-                return;
-              }
-              dados.nomeUsuario = usuarioDoc.data().nome
-            })
-            .catch(error => {
-              console.error('Erro ao obter detalhes da usuario:', error);
-              reject('Erro ao obter detalhes da usuario.');
-            });
+              .then(usuarioDoc => {
+                if (!usuarioDoc.exists) {
+                  reject('usuario não encontrada.');
+                  return;
+                }
+                dados.nomeUsuario = usuarioDoc.data().nome
+              })
+              .catch(error => {
+                console.error('Erro ao obter detalhes da usuario:', error);
+                reject('Erro ao obter detalhes da usuario.');
+              });
 
 
             db.collection('Endereco').doc(dados.enderecoId).get()
@@ -165,7 +181,7 @@ class Fazenda {
 
             Promise.all(promisesTalhoes)
               .then(talhoes => {
-                dados.talhoes = talhoes; 
+                dados.talhoes = talhoes;
                 resolve(dados);
               })
               .catch(error => {

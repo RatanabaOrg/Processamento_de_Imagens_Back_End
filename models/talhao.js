@@ -74,20 +74,36 @@ class Talhao {
         });
     }
 
-    async excluir(talhaoId) {
+    excluir(talhaoId) {
         return new Promise((resolve, reject) => {
             const db = admin.firestore();
-
+    
+            // Primeiro, exclua a armadilha.
             db.collection('Talhao').doc(talhaoId).delete()
                 .then(() => {
-                    resolve('Talhão excluído com sucesso.');
+                    // Busca todos os talhões que contêm o ID da armadilha em seu array.
+                    return db.collection('Fazenda').where('talhaoId', 'array-contains', talhaoId).get();
+                })
+                .then(querySnapshot => {
+                    // Cria uma lista de promessas para atualizar cada talhão.
+                    const updatePromises = [];
+                    querySnapshot.forEach(doc => {
+                        // Remove o ID da armadilha do array 'armadilhaId'.
+                        const updatedTalhaoIds = doc.data().talhaoId.filter(id => id !== talhaoId);
+                        updatePromises.push(doc.ref.update({ talhaoId: updatedTalhaoIds }));
+                    });
+                    // Espera todas as atualizações serem concluídas.
+                    return Promise.all(updatePromises);
+                })
+                .then(() => {
+                    resolve('Armadilha excluída com sucesso e referências atualizadas.');
                 })
                 .catch(error => {
-                    console.error('Erro ao excluir talhão:', error);
-                    reject('Erro ao excluir talhão.');
+                    console.error('Erro ao excluir armadilha ou atualizar talhões:', error);
+                    reject('Erro ao excluir armadilha ou atualizar talhões.');
                 });
         });
-    }
+    } 
 
     async buscarTodos() {
         return new Promise((resolve, reject) => {
@@ -110,6 +126,7 @@ class Talhao {
     }
 
     buscarPorUidCompleto(talhaoId) {
+        console.log(talhaoId);
         return new Promise((resolve, reject) => {
           const db = admin.firestore();
     
