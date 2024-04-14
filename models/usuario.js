@@ -36,7 +36,8 @@ class Usuario {
                 nome,
                 telefone,
                 enderecoId,
-                cliente: true
+                cliente: true,
+                aprovado: false
               });
             })
             .then(() => {

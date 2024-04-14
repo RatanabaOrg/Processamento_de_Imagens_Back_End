@@ -132,9 +132,22 @@ class Fazenda {
             if (talhoesIds != undefined) {
               for (let f = 0; f < talhoesIds.length; f++) {
                 const talhao = new Talhao();
-                promisesTalhoes.push(talhao.buscarPorUidCompleto(talhoesIds[f])); // Adiciona a promessa ao array
+                promisesTalhoes.push(talhao.buscarPorUidCompleto(talhoesIds[f])); 
               }
             }
+
+            db.collection('DadosUsuario').doc(dados.usuarioId).get()
+            .then(usuarioDoc => {
+              if (!usuarioDoc.exists) {
+                reject('usuario não encontrada.');
+                return;
+              }
+              dados.nomeUsuario = usuarioDoc.data().nome
+            })
+            .catch(error => {
+              console.error('Erro ao obter detalhes da usuario:', error);
+              reject('Erro ao obter detalhes da usuario.');
+            });
 
 
             db.collection('Endereco').doc(dados.enderecoId).get()
@@ -152,7 +165,7 @@ class Fazenda {
 
             Promise.all(promisesTalhoes)
               .then(talhoes => {
-                dados.talhoes = talhoes; // Adiciona a lista de fazendas aos dados
+                dados.talhoes = talhoes; 
                 resolve(dados);
               })
               .catch(error => {
