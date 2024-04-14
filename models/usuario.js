@@ -58,7 +58,7 @@ class Usuario {
     return new Promise((resolve, reject) => {
       admin.auth().getUser(uid)
         .then(userRecord => {
-          const userEmail = userRecord.email; // Acessa o email do registro de autenticação
+          const userEmail = userRecord.email; 
           const db = admin.firestore();
           db.collection('DadosUsuario').doc(uid).get()
             .then(doc => {
@@ -66,9 +66,10 @@ class Usuario {
                 reject('Nenhum dado encontrado.');
               } else {
                 const userData = doc.data();
+                console.log(userData);
                 resolve({
-                  ...userData,  // Incorpora os dados existentes do Firestore
-                  email: userEmail  // Adiciona o email ao objeto retornado
+                  ...userData,  
+                  email: userEmail 
                 });
               }
             })

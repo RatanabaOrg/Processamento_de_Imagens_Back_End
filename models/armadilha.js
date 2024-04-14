@@ -10,13 +10,13 @@ if (admin.apps.length === 0) {
 class Armadilha {
     cadastro(data) {
         return new Promise((resolve, reject) => {
-            const { nomeArmadilha, coordenadas, talhaoId } = data;
+            const { nomeArmadilha, latitude, longitude, talhaoId } = data;
 
             const db = admin.firestore();
 
             let armadilhaId;
 
-            db.collection('Armadilha').add({ nomeArmadilha, coordenadas, talhaoId })
+            db.collection('Armadilha').add({ nomeArmadilha, latitude, longitude, talhaoId })
                 .then(armadilhaDoc => {
                     armadilhaId = armadilhaDoc.id;
 

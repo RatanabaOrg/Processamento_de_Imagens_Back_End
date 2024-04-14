@@ -100,34 +100,47 @@ class Fazenda {
   buscarTodos() {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
-
+  
       db.collection('Fazenda').get()
         .then(async snapshot => {
           const fazendas = [];
           const userPromises = [];
-
+          const enderecoPromises = [];
+  
           snapshot.forEach(doc => {
             const fazendaData = { id: doc.id, ...doc.data() };
             fazendas.push(fazendaData);
+  
+            // Buscar dados do usuário
             const userPromise = db.collection('DadosUsuario').doc(fazendaData.usuarioId).get();
             userPromises.push(userPromise);
+  
+            // Buscar dados do endereço
+            const enderecoPromise = db.collection('Endereco').doc(fazendaData.enderecoId).get()
+            enderecoPromises.push(enderecoPromise);
           });
-
+  
           const users = await Promise.all(userPromises);
-
-          const fazendasComUsuarios = fazendas.map((fazenda, index) => {
+          const enderecos = await Promise.all(enderecoPromises);
+  
+          const fazendasComUsuariosEEnderecos = fazendas.map((fazenda, index) => {
             const userData = users[index].data();
-            return { ...fazenda, nomeUsuario: userData ? userData.nome : 'Usuário não encontrado' };
+            const enderecoData = enderecos[index].data();
+            return {
+              ...fazenda,
+              nomeUsuario: userData ? userData.nome : 'Usuário não encontrado',
+              endereco: enderecoData ? enderecoData : 'Endereço não encontrado'
+            };
           });
-
-          resolve(fazendasComUsuarios);
+  
+          resolve(fazendasComUsuariosEEnderecos);
         })
         .catch(error => {
           console.error('Erro ao obter todas as fazendas:', error);
           reject('Erro ao obter todas as fazendas.');
         });
     });
-  }
+  }  
 
   buscarPorUidCompleto(fazendaId) {
     return new Promise((resolve, reject) => {
