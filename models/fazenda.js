@@ -102,12 +102,25 @@ class Fazenda {
       const db = admin.firestore();
 
       db.collection('Fazenda').get()
-        .then(snapshot => {
+        .then(async snapshot => {
           const fazendas = [];
+          const userPromises = [];
+
           snapshot.forEach(doc => {
-            fazendas.push({ id: doc.id, ...doc.data() });
+            const fazendaData = { id: doc.id, ...doc.data() };
+            fazendas.push(fazendaData);
+            const userPromise = db.collection('DadosUsuario').doc(fazendaData.usuarioId).get();
+            userPromises.push(userPromise);
           });
-          resolve(fazendas);
+
+          const users = await Promise.all(userPromises);
+
+          const fazendasComUsuarios = fazendas.map((fazenda, index) => {
+            const userData = users[index].data();
+            return { ...fazenda, nomeUsuario: userData ? userData.nome : 'Usuário não encontrado' };
+          });
+
+          resolve(fazendasComUsuarios);
         })
         .catch(error => {
           console.error('Erro ao obter todas as fazendas:', error);
@@ -129,7 +142,7 @@ class Fazenda {
             const dados = doc.data();
             console.log(dados);
             const talhoesIds = dados.talhaoId;
-            const promisesTalhoes = []; 
+            const promisesTalhoes = [];
             if (talhoesIds != undefined) {
               for (let f = 0; f < talhoesIds.length; f++) {
                 const talhao = new Talhao();
