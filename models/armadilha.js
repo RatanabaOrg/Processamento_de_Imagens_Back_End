@@ -20,7 +20,6 @@ class Armadilha {
                 .then(armadilhaDoc => {
                     armadilhaId = armadilhaDoc.id;
 
-                    // Atualize o documento do talhão para incluir o ID da armadilha
                     return db.collection('Talhao').doc(talhaoId).update({
                         armadilhaId: admin.firestore.FieldValue.arrayUnion(armadilhaId)
                     });

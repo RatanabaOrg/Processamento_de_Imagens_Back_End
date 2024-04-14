@@ -100,52 +100,26 @@ class Fazenda {
   buscarTodos() {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
-  
+
       db.collection('Fazenda').get()
-        .then(async snapshot => {
+        .then(snapshot => {
           const fazendas = [];
-          const userPromises = [];
-          const enderecoPromises = [];
-  
           snapshot.forEach(doc => {
-            const fazendaData = { id: doc.id, ...doc.data() };
-            fazendas.push(fazendaData);
-  
-            // Buscar dados do usuário
-            const userPromise = db.collection('DadosUsuario').doc(fazendaData.usuarioId).get();
-            userPromises.push(userPromise);
-  
-            // Buscar dados do endereço
-            const enderecoPromise = db.collection('Endereco').doc(fazendaData.enderecoId).get()
-            enderecoPromises.push(enderecoPromise);
+            fazendas.push({ id: doc.id, ...doc.data() });
           });
-  
-          const users = await Promise.all(userPromises);
-          const enderecos = await Promise.all(enderecoPromises);
-  
-          const fazendasComUsuariosEEnderecos = fazendas.map((fazenda, index) => {
-            const userData = users[index].data();
-            const enderecoData = enderecos[index].data();
-            return {
-              ...fazenda,
-              nomeUsuario: userData ? userData.nome : 'Usuário não encontrado',
-              endereco: enderecoData ? enderecoData : 'Endereço não encontrado'
-            };
-          });
-  
-          resolve(fazendasComUsuariosEEnderecos);
+          resolve(fazendas);
         })
         .catch(error => {
           console.error('Erro ao obter todas as fazendas:', error);
           reject('Erro ao obter todas as fazendas.');
         });
     });
-  }  
+  }
 
   buscarPorUidCompleto(fazendaId) {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
-  
+
       // Primeiro, obtenha os detalhes da fazenda
       db.collection('Fazenda').doc(fazendaId).get()
         .then(doc => {
@@ -153,50 +127,46 @@ class Fazenda {
             reject('Nenhum dado encontrado.');
           } else {
             const dados = doc.data();
-            const usuarioId = dados.usuarioId; // Suponho que esse seja o campo que relaciona com o usuário
             const talhoesIds = dados.talhaoId;
             const promisesTalhoes = [];
-            
             if (talhoesIds != undefined) {
               for (let f = 0; f < talhoesIds.length; f++) {
                 const talhao = new Talhao();
                 promisesTalhoes.push(talhao.buscarPorUidCompleto(talhoesIds[f])); // Adiciona a promessa ao array
               }
             }
-  
-            // Adiciona a busca de detalhes do usuário
-            db.collection('DadosUsuario').doc(usuarioId).get()
-              .then(userDoc => {
-                const userData = userDoc.data();
-                if (!userDoc.exists) {
-                  dados.usuarioNome = 'Usuário não encontrado'
-                } else {
-                  dados.usuarioNome = userData.nome; // Adiciona o nome do usuário aos dados da fazenda
+
+
+            db.collection('Endereco').doc(dados.enderecoId).get()
+              .then(enderecoDoc => {
+                if (!enderecoDoc.exists) {
+                  reject('endereco não encontrada.');
+                  return;
                 }
-                
-                // Aguarda a resolução de todas as promessas dos talhões
-                Promise.all(promisesTalhoes)
-                  .then(talhoes => {
-                    dados.talhoes = talhoes; // Adiciona a lista de talhões aos dados
-                    resolve(dados);
-                  })
-                  .catch(error => {
-                    console.error('Erro ao buscar detalhes dos talhões:', error);
-                    reject('Erro ao buscar detalhes dos talhões.');
-                  });
+                dados.endereco = enderecoDoc.data()
               })
               .catch(error => {
-                console.error('Erro ao buscar dados do usuário:', error);
-                reject('Erro ao buscar informações do usuário.');
+                console.error('Erro ao obter detalhes da endereco:', error);
+                reject('Erro ao obter detalhes da endereco.');
+              });
+
+            Promise.all(promisesTalhoes)
+              .then(talhoes => {
+                dados.talhoes = talhoes; // Adiciona a lista de fazendas aos dados
+                resolve(dados);
+              })
+              .catch(error => {
+                console.error('Erro ao buscar detalhes das fazendas:', error);
+                reject('Erro ao buscar detalhes das fazendas.');
               });
           }
         })
         .catch(error => {
-          console.error('Erro ao buscar dados da fazenda:', error);
-          reject('Erro ao buscar informações adicionais da fazenda.');
+          console.error('Erro ao buscar dados adicionais:', error);
+          reject('Erro ao buscar informações adicionais do usuário.');
         });
     });
-  }  
+  }
 
 }
 
