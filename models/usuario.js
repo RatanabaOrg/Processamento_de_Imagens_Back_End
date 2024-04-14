@@ -82,7 +82,7 @@ class Usuario {
           reject('Usuário não encontrado.');
         });
     });
-  }  
+  }
 
   async atualizar(uid, data) {
     return new Promise((resolve, reject) => {
@@ -133,14 +133,29 @@ class Usuario {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
       db.collection('DadosUsuario').get()
-        .then(snapshot => {
+        .then(async snapshot => {
           if (snapshot.empty) {
             resolve('Nenhum usuário encontrado.');
             return;
           }
-          let usuarios = [];
-          snapshot.forEach(doc => usuarios.push({ id: doc.id, ...doc.data() }));
-          resolve(usuarios);
+
+          const userPromises = snapshot.docs.map(doc => {
+            return admin.auth().getUser(doc.id) // Tentativa de obter o email do usuário do Firebase Auth
+              .then(userRecord => {
+                return { id: doc.id, email: userRecord.email, ...doc.data() };
+              })
+              .catch(error => {
+                console.error(`Erro ao obter dados do usuário com UID ${doc.id}:`, error);
+                return { id: doc.id, email: 'Email não disponível', ...doc.data() }; // Retorna sem email se houver erro
+              });
+          });
+
+          Promise.all(userPromises)
+            .then(users => resolve(users))
+            .catch(error => {
+              console.error('Erro ao processar usuários:', error);
+              reject('Erro ao buscar usuários.');
+            });
         })
         .catch(error => {
           console.error('Erro ao buscar todos os usuários:', error);
