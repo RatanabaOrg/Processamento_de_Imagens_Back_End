@@ -58,14 +58,18 @@ class Usuario {
     return new Promise((resolve, reject) => {
       admin.auth().getUser(uid)
         .then(userRecord => {
-          // Supondo que os dados adicionais dos usuários estão armazenados no Firestore
+          const userEmail = userRecord.email; // Acessa o email do registro de autenticação
           const db = admin.firestore();
           db.collection('DadosUsuario').doc(uid).get()
             .then(doc => {
               if (!doc.exists) {
                 reject('Nenhum dado encontrado.');
               } else {
-                resolve(doc.data());
+                const userData = doc.data();
+                resolve({
+                  ...userData,  // Incorpora os dados existentes do Firestore
+                  email: userEmail  // Adiciona o email ao objeto retornado
+                });
               }
             })
             .catch(error => {
@@ -78,7 +82,7 @@ class Usuario {
           reject('Usuário não encontrado.');
         });
     });
-  }
+  }  
 
   async atualizar(uid, data) {
     return new Promise((resolve, reject) => {
