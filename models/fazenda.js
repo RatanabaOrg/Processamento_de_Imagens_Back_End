@@ -132,7 +132,7 @@ class Fazenda {
   buscarPorUidCompleto(fazendaId) {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
-
+  
       // Primeiro, obtenha os detalhes da fazenda
       db.collection('Fazenda').doc(fazendaId).get()
         .then(doc => {
@@ -140,33 +140,50 @@ class Fazenda {
             reject('Nenhum dado encontrado.');
           } else {
             const dados = doc.data();
-            console.log(dados);
+            const usuarioId = dados.usuarioId; // Suponho que esse seja o campo que relaciona com o usuário
             const talhoesIds = dados.talhaoId;
             const promisesTalhoes = [];
+            
             if (talhoesIds != undefined) {
               for (let f = 0; f < talhoesIds.length; f++) {
                 const talhao = new Talhao();
                 promisesTalhoes.push(talhao.buscarPorUidCompleto(talhoesIds[f])); // Adiciona a promessa ao array
               }
             }
-            // Aguarda a resolução de todas as promessas
-            Promise.all(promisesTalhoes)
-              .then(talhoes => {
-                dados.talhoes = talhoes; // Adiciona a lista de fazendas aos dados
-                resolve(dados);
+  
+            // Adiciona a busca de detalhes do usuário
+            db.collection('DadosUsuario').doc(usuarioId).get()
+              .then(userDoc => {
+                const userData = userDoc.data();
+                if (!userDoc.exists) {
+                  dados.usuarioNome = 'Usuário não encontrado'
+                } else {
+                  dados.usuarioNome = userData.nome; // Adiciona o nome do usuário aos dados da fazenda
+                }
+                
+                // Aguarda a resolução de todas as promessas dos talhões
+                Promise.all(promisesTalhoes)
+                  .then(talhoes => {
+                    dados.talhoes = talhoes; // Adiciona a lista de talhões aos dados
+                    resolve(dados);
+                  })
+                  .catch(error => {
+                    console.error('Erro ao buscar detalhes dos talhões:', error);
+                    reject('Erro ao buscar detalhes dos talhões.');
+                  });
               })
               .catch(error => {
-                console.error('Erro ao buscar detalhes das fazendas:', error);
-                reject('Erro ao buscar detalhes das fazendas.');
+                console.error('Erro ao buscar dados do usuário:', error);
+                reject('Erro ao buscar informações do usuário.');
               });
           }
         })
         .catch(error => {
-          console.error('Erro ao buscar dados adicionais:', error);
-          reject('Erro ao buscar informações adicionais do usuário.');
+          console.error('Erro ao buscar dados da fazenda:', error);
+          reject('Erro ao buscar informações adicionais da fazenda.');
         });
     });
-  }
+  }  
 
 }
 
