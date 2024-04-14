@@ -159,7 +159,7 @@ class Usuario {
                 const dados = doc.data();
                 const fazendasIds = dados.fazendaId;
                 const promisesFazendas = []; // Array para armazenar as promessas de busca das fazendas
-                if (fazendasIds.length > 0) {
+                if (fazendasIds != undefined) {
                   for (let f = 0; f < fazendasIds.length; f++) {
                     const fazenda = new Fazenda();
                     promisesFazendas.push(fazenda.buscarPorUidCompleto(fazendasIds[f])); // Adiciona a promessa ao array

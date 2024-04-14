@@ -120,8 +120,6 @@ class Fazenda {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
 
-      let fazenda = {};
-
       // Primeiro, obtenha os detalhes da fazenda
       db.collection('Fazenda').doc(fazendaId).get()
         .then(doc => {
@@ -129,9 +127,10 @@ class Fazenda {
             reject('Nenhum dado encontrado.');
           } else {
             const dados = doc.data();
+            console.log(dados);
             const talhoesIds = dados.talhaoId;
-            const promisesTalhoes = []; // Array para armazenar as promessas de busca das fazendas
-            if (talhoesIds.length > 0) {
+            const promisesTalhoes = []; 
+            if (talhoesIds != undefined) {
               for (let f = 0; f < talhoesIds.length; f++) {
                 const talhao = new Talhao();
                 promisesTalhoes.push(talhao.buscarPorUidCompleto(talhoesIds[f])); // Adiciona a promessa ao array
