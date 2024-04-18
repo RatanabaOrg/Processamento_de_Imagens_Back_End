@@ -59,7 +59,7 @@ class Usuario {
     return new Promise((resolve, reject) => {
       admin.auth().getUser(uid)
         .then(userRecord => {
-          const userEmail = userRecord.email; 
+          const userEmail = userRecord.email;
           const db = admin.firestore();
           db.collection('DadosUsuario').doc(uid).get()
             .then(doc => {
@@ -67,10 +67,9 @@ class Usuario {
                 reject('Nenhum dado encontrado.');
               } else {
                 const userData = doc.data();
-                console.log(userData);
                 resolve({
-                  ...userData,  
-                  email: userEmail 
+                  ...userData,
+                  email: userEmail
                 });
               }
             })
@@ -91,24 +90,32 @@ class Usuario {
       admin.auth().updateUser(uid, data)
         .then(() => {
           const db = admin.firestore();
-          const { cep, logradouro, numero, cidade, uf, complemento, bairro, telefone, nome } = data;
+          const { cep, logradouro, numero, cidade, uf, complemento, bairro, telefone, nome, aprovado, enderecoId } = data;
+  
+          // Atualizando informações na coleção DadosUsuario
           db.collection('DadosUsuario').doc(uid).update({
-            cep, logradouro, numero, cidade, uf, complemento, bairro, telefone, nome
-          })
-            .then(() => {
-              resolve('Usuário atualizado com sucesso.');
-            })
-            .catch(error => {
-              console.error('Erro ao atualizar dados adicionais:', error);
-              reject('Erro ao atualizar informações adicionais do usuário.');
+            telefone, nome, aprovado
+          }).then(() => {
+            // Atualizando informações de endereço na coleção Endereco
+            db.collection('Endereco').doc(enderecoId).update({
+              cep, logradouro, numero, cidade, uf, complemento, bairro
+            }).then(() => {
+              resolve('Usuário e endereço atualizados com sucesso.');
+            }).catch(error => {
+              console.error('Erro ao atualizar endereço:', error);
+              reject('Erro ao atualizar endereço do usuário.');
             });
+          }).catch(error => {
+            console.error('Erro ao atualizar dados do usuário:', error);
+            reject('Erro ao atualizar informações do usuário.');
+          });
         })
         .catch(error => {
-          console.error('Erro ao atualizar usuário:', error);
-          reject('Erro ao atualizar usuário.');
+          console.error('Erro ao atualizar usuário no Auth:', error);
+          reject('Erro ao atualizar usuário no Auth.');
         });
     });
-  }
+  }  
 
   async excluir(uid) {
     return new Promise((resolve, reject) => {
@@ -166,49 +173,37 @@ class Usuario {
     });
   }
 
-  buscarPorUidCompleto(uid) {
-    return new Promise((resolve, reject) => {
-      admin.auth().getUser(uid)
-        .then(userRecord => {
-          // Supondo que os dados adicionais dos usuários estão armazenados no Firestore
-          const db = admin.firestore();
-          db.collection('DadosUsuario').doc(uid).get()
-            .then(doc => {
-              if (!doc.exists) {
-                reject('Nenhum dado encontrado.');
-              } else {
-                const dados = doc.data();
-                const fazendasIds = dados.fazendaId;
-                const promisesFazendas = []; // Array para armazenar as promessas de busca das fazendas
-                if (fazendasIds != undefined) {
-                  for (let f = 0; f < fazendasIds.length; f++) {
-                    const fazenda = new Fazenda();
-                    promisesFazendas.push(fazenda.buscarPorUidCompleto(fazendasIds[f])); // Adiciona a promessa ao array
-                  }
-                }
-                // Aguarda a resolução de todas as promessas
-                Promise.all(promisesFazendas)
-                  .then(fazendas => {
-                    dados.fazendas = fazendas; // Adiciona a lista de fazendas aos dados
-                    resolve(dados);
-                  })
-                  .catch(error => {
-                    console.error('Erro ao buscar detalhes das fazendas:', error);
-                    reject('Erro ao buscar detalhes das fazendas.');
-                  });
-              }
-            })
-            .catch(error => {
-              console.error('Erro ao buscar dados adicionais:', error);
-              reject('Erro ao buscar informações adicionais do usuário.');
-            });
-        })
-        .catch(error => {
-          console.error('Erro ao buscar usuário:', error);
-          reject('Usuário não encontrado.');
-        });
-    });
-  }
+  async buscarPorUidCompleto(uid) {
+    try {
+      const userRecord = await admin.auth().getUser(uid);
+      const db = admin.firestore();
+      
+      const doc = await db.collection('DadosUsuario').doc(uid).get();
+
+      if (!doc.exists) {
+        throw new Error('Nenhum dado encontrado.');
+      }
+      const dados = {
+        ...doc.data(),
+        email: userRecord.email 
+      };
+  
+      const enderecoDoc = await db.collection('Endereco').doc(dados.enderecoId).get();
+      if (!enderecoDoc.exists) {
+        throw new Error('Endereço não encontrado.');
+      }
+      dados.endereco = enderecoDoc.data();
+  
+      const promisesFazendas = dados.fazendaId ? dados.fazendaId.map(f => new Fazenda().buscarPorUidCompleto(f)) : [];
+      dados.fazendas = await Promise.all(promisesFazendas);
+  
+      return dados;
+    } catch (error) {
+      console.error('Erro durante a busca de dados:', error);
+      throw error;
+    }
+  };
+  
 
 
 }

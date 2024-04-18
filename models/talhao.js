@@ -126,7 +126,6 @@ class Talhao {
     }
 
     buscarPorUidCompleto(talhaoId) {
-        console.log(talhaoId);
         return new Promise((resolve, reject) => {
           const db = admin.firestore();
     

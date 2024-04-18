@@ -23,6 +23,7 @@ class Verificacao {
             }
         } catch (error) {
             console.error('Erro ao verificar token:', error);
+            return false
         }
     }
     
