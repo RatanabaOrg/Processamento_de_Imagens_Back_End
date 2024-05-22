@@ -9,7 +9,7 @@ app = Flask(__name__)
 model = YOLO('modeloAI/best.pt')
 
 # Configurações do Firebase
-firebase_cred = credentials.Certificate("firebaseAdminConfig.json")
+firebase_cred = credentials.Certificate("../firebaseAdminConfig.json")
 firebase_app = initialize_app(firebase_cred)
 firebase_storage = storage.bucket(app=firebase_app, name="ratanaba5")
 firebase_db = firestore.client()
@@ -32,17 +32,9 @@ def get_image(document_id):
     pragas = 0
     imagens = doc.to_dict()['fotos']
     for image in imagens:
-        # Recupera a URL da imagem do documento
-        image_url = "https://firebasestorage.googleapis.com/v0/b/ratanaba5.appspot.com/o/armadilha%2F" + image #+ "?alt=media&token=0e886d69-854f-4109-b9b9-ce14f3d4db32" 
-        
-        # Baixa a imagem para o caminho local
-        response = requests.get(image_url)
-        obj = response.json()
-        local_path = "imagens/"+image
-
-        token = obj['downloadTokens']
-        image_url = "https://firebasestorage.googleapis.com/v0/b/ratanaba5.appspot.com/o/armadilha%2F" + image +f'?alt=media&token={token}'
-        response = requests.get(image_url)
+        local_path = "imagens/imagem"
+        print(image)
+        response = requests.get(image)
         with open(local_path, 'wb') as f:
             f.write(response.content)
 
