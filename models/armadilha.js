@@ -13,10 +13,10 @@ class Armadilha {
             const { nomeArmadilha, coordenada, talhaoId } = data;
 
             const db = admin.firestore();
-
+            let pragas = 0;
             let armadilhaId;
 
-            db.collection('Armadilha').add({ nomeArmadilha, coordenada, talhaoId })
+            db.collection('Armadilha').add({ nomeArmadilha, coordenada, talhaoId, pragas })
                 .then(armadilhaDoc => {
                     armadilhaId = armadilhaDoc.id;
 
@@ -75,7 +75,7 @@ class Armadilha {
     excluir(armadilhaId) {
         return new Promise((resolve, reject) => {
             const db = admin.firestore();
-    
+
             // Primeiro, exclua a armadilha.
             db.collection('Armadilha').doc(armadilhaId).delete()
                 .then(() => {
@@ -101,7 +101,7 @@ class Armadilha {
                     reject('Erro ao excluir armadilha ou atualizar talhões.');
                 });
         });
-    }    
+    }
 
     // Função para obter todas as armadilhas
     buscarTodos() {
