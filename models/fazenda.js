@@ -13,7 +13,7 @@ class Fazenda {
   cadastro(data) {
     return new Promise((resolve, reject) => {
       const { nomeFazenda, coordenadaSede, usuarioId } = data;
-
+      console.log(nomeFazenda, coordenadaSede, usuarioId)
       const db = admin.firestore();
 
       db.collection('Fazenda').add({
@@ -31,20 +31,17 @@ class Fazenda {
     });
   }
 
-
   atualizar(fazendaId, novosDados) {
     return new Promise((resolve, reject) => {
       const db = admin.firestore();
       const {
         coordenadaSede,
-        usuarioId,
         nomeFazenda
       } = novosDados;
 
       // Atualizando informações na coleção Fazenda
       db.collection('Fazenda').doc(fazendaId).update({
         coordenadaSede,
-        usuarioId,
         nomeFazenda
       }).then(() => {
         resolve('Fazenda e endereço atualizados com sucesso.');

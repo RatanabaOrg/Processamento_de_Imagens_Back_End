@@ -1,4 +1,6 @@
 const express = require('express');
+const multer = require('multer'); 
+
 const bodyParser = require('body-parser');
 const { Usuario } = require('./models/usuario');
 const usuario = require('./models/usuario');
@@ -10,6 +12,7 @@ const { Verificacao } = require('./models/verificacao');
 
 
 const app = express();
+const upload = multer()
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -195,14 +198,23 @@ app.get('/usuario', async (req, res) => {
 // Fazenda
 app.post('/fazenda/cadastro', async (req, res) => {
     var fazenda = new Fazenda();
-
     const authHeader = req.headers.authorization
     var verificacao = new Verificacao()
     const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
 
     if (tokenUid != false) {
         try {
-            var resultado = await fazenda.cadastro(req.body);
+            if (req.body.geojson) {
+                const geojson = req.body.geojson
+                const idAgricultor = req.body.usuarioId
+                const nomeFazenda = geojson.features.properties.FAZENDA
+                const coordenadas = geojson.features.geometry.coordinates[0]
+                const coordenadaSede = coordenadas.map(coordenada => ({ latitude: coordenada[0], longitude: coordenada[1] }));
+                var resultado = await fazenda.cadastro({nomeFazenda: nomeFazenda, coordenadaSede: coordenadaSede, usuarioId: idAgricultor});
+            } else {
+                var resultado = await fazenda.cadastro(req.body);
+            }
+            
             res.send(resultado);
         } catch (error) {
             res.status(500).send("Erro durante o processo de cadastro.");
@@ -328,14 +340,23 @@ app.get('/fazenda', async (req, res) => {
 // Talhao
 app.post('/talhao/cadastro', async (req, res) => {
     var talhao = new Talhao();
-
     const authHeader = req.headers.authorization
     var verificacao = new Verificacao()
     const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
 
     if (tokenUid != false) {
         try {
-            var resultado = await talhao.cadastro(req.body);
+            if (req.body.geoJson) {
+                const geojson = req.body.geoJson
+                const idFazenda = req.body.fazendaId
+                const nomeTalhao = geojson.features.properties.NAME
+                const tipoPlantacao = geojson.features.properties.tipoPlantacao
+                const coordenadas = geojson.features.geometry.coordinates[0]
+                const coordenadasFormatadas = coordenadas.map(coordenada => ({ latitude: coordenada[0], longitude: coordenada[1] }));
+                var resultado = await talhao.cadastro({nomeTalhao: nomeTalhao, tipoPlantacao: tipoPlantacao, coordenadas: coordenadasFormatadas, fazendaId: idFazenda});
+            } else {
+                var resultado = await talhao.cadastro(req.body);
+            }
             res.send(resultado);
         } catch (error) {
             res.status(500).send("Erro durante o processo de cadastro.");
@@ -460,14 +481,22 @@ app.get('/talhao', async (req, res) => {
 // Armadilha
 app.post('/armadilha/cadastro', async (req, res) => {
     var armadilha = new Armadilha();
-
     const authHeader = req.headers.authorization
     var verificacao = new Verificacao()
     const tokenUid = await verificacao.verificarToken(authHeader.split(' ')[1]);
 
     if (tokenUid != false) {
         try {
-            var resultado = await armadilha.cadastro(req.body);
+            if (req.body.geoJson) {
+                const geojson = req.body.geoJson
+                const idTalhao = req.body.talhaoId
+                const nomeArmadilha = geojson.features.properties.NAME
+                const coordenadas = geojson.features.geometry.coordinates
+                const coordenadasFormatadas = { latitude: coordenadas[0], longitude: coordenadas[1] };
+                var resultado = await armadilha.cadastro({nomeArmadilha: nomeArmadilha, coordenada: coordenadasFormatadas, talhaoId: idTalhao});
+            } else {
+                var resultado = await armadilha.cadastro(req.body);
+            }
             res.send(resultado);
         } catch (error) {
             res.status(500).send("Erro durante o processo de cadastro.");
