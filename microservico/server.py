@@ -3,6 +3,12 @@ from firebase_admin import credentials, initialize_app, storage, firestore
 import requests
 from ultralytics import YOLO
 import os
+from twilio.rest import Client
+from datetime import date
+
+account_sid = 'AC4a721c9f1e981c96b97d48cf87692410'  # Replace with your Account SID from Twilio Console
+auth_token = '528e317e04b2440da3ea3804e9268227' 
+client = Client(account_sid, auth_token)
 
 
 app = Flask(__name__)
@@ -15,8 +21,8 @@ firebase_storage = storage.bucket(app=firebase_app, name="ratanaba5")
 firebase_db = firestore.client()
 
 # Rota para recuperar uma imagem específica
-@app.route('/image/<document_id>')
-def get_image(document_id):
+@app.route('/image/<document_id>/<numero>')
+def get_image(document_id, numero):
     # Recupera o documento do Firestore
     doc_ref = firebase_db.collection('Armadilha').document(document_id)
     doc = doc_ref.get()
@@ -29,11 +35,13 @@ def get_image(document_id):
     if 'fotos' not in doc.to_dict():
         return "URL da imagem não encontrada no documento", 404
     
+    
+    armadilha = doc.to_dict()
+    imagens = armadilha['fotos']
+    ocorrencias = armadilha['pragas']
     pragas = 0
-    imagens = doc.to_dict()['fotos']
     for image in imagens:
         local_path = "imagens/imagem"
-        print(image)
         response = requests.get(image)
         with open(local_path, 'wb') as f:
             f.write(response.content)
@@ -44,8 +52,29 @@ def get_image(document_id):
 
         if os.path.exists(local_path):
             os.remove(local_path)
-
-    doc_ref.update({"pragas": doc.to_dict()["pragas"] + pragas, "fotos": []})
+    
+    dataAtual = date.today().strftime("%d/%m/%Y")
+    try:
+        ultimaOcorrencia = ocorrencias[-1]
+        if dataAtual == ultimaOcorrencia['data']:
+            ultimaOcorrencia['quantidade'] = ultimaOcorrencia['quantidade'] + pragas
+        else:
+            ocorrencia = {}
+            ocorrencia['quantidade'] = pragas
+            ocorrencia['data'] = dataAtual
+            ocorrencias.append(ocorrencia)
+    except:
+            ocorrencia = {}
+            ocorrencia['quantidade'] = pragas
+            ocorrencia['data'] = dataAtual
+            ocorrencias.append(ocorrencia)
+        
+    doc_ref.update({"pragas": ocorrencias, "fotos": []})
+    message = client.messages.create(
+    from_='whatsapp:+14155238886',  # This is the Twilio sandbox number for WhatsApp
+    body=f'Foram detectadas {pragas} pragas em {len(imagens)} fotos tiradas na armadilha {armadilha['nomeArmadilha']}.',
+    to='whatsapp:+'+numero       # Replace with the recipient's WhatsApp number
+)
 
     return str(pragas)
 
