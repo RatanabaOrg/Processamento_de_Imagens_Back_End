@@ -7,7 +7,7 @@ from twilio.rest import Client
 from datetime import date
 
 account_sid = 'AC4a721c9f1e981c96b97d48cf87692410'  # Replace with your Account SID from Twilio Console
-auth_token = '528e317e04b2440da3ea3804e9268227' 
+auth_token = 'bc5ae46ee487fc61831fe6089d392ac0' 
 client = Client(account_sid, auth_token)
 
 

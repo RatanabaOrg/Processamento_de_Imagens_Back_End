@@ -21,6 +21,13 @@ class Fazenda {
         coordenadaSede,
         usuarioId
       })
+      .then(fazendaDoc => {
+        let fazendaId = fazendaDoc.id;
+
+        return db.collection('DadosUsuario').doc(usuarioId).update({
+            fazendaId: admin.firestore.FieldValue.arrayUnion(fazendaId)
+        });
+    })
         .then(() => {
           resolve('Fazenda cadastrada com sucesso.');
         })
