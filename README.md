@@ -13,6 +13,7 @@
 Antes de iniciar, certifique-se de ter instalado no seu sistema:
 - Node.js (versão 18.20.1 ou superior)
 - npm (versão 10.5.0 ou superior) ou Yarn (versão 1.22.19 ou superior)
+- Python (versão 3.11 ou superior)
 
 <br>
 
@@ -24,23 +25,19 @@ Siga os passos abaixo para executar o projeto localmente:
   ```
   git clone https://github.com/RatanabaOrg/back_end.git
   ```
-3. Instale as dependências:
+2. Instale as dependências:
   ```
   npm install
   ```
-4. Configure o ambiente:
-- Copie o arquivo `.env.example` para `.env`:
+3. Inicie o microservico:
+   - entre na pasta `microservico`
   ```
-  cp .env.example .env
+  python server.py
   ```
-- Edite o arquivo `.env` com as configurações do seu ambiente, como strings de conexão do banco de dados, portas, etc.
-
-5. Inicie o servidor:
+4. Inicie o servidor:
   ```
   node app.js
   ```
-
-O servidor estará rodando e acessível em `http://localhost:PORTA`, onde `PORTA` é a porta configurada no seu arquivo `.env`.
 
 <br>
 
